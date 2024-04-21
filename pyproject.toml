@@ -1,0 +1,14 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+
+[project]
+name = "phoebe_demi_bot_llm"
+version = "0.0.1"
+dependencies = [
+    "langchain",
+    "langchain_openai",
+    "openai",
+    "python-dotenv",
+]
