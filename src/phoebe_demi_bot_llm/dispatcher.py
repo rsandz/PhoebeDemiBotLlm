@@ -1,9 +1,11 @@
+import sqlite3
 from typing import Callable, List
 
 from langchain_openai import ChatOpenAI
 from langchain.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain.globals import set_debug, set_verbose
 
+from phoebe_demi_bot_llm.dao.throttle_dao import ThrottleDAO
 from phoebe_demi_bot_llm.handlers.handler_protocol import (
     HandlerContinue,
     HandlerProtocol,
@@ -43,9 +45,18 @@ class LlmDispatcher:
             ]
         )
 
+        db = sqlite3.connect("bot_llm.db")
+        throttle_dao = ThrottleDAO(db)
+        throttle_dao.insert_override_count_limit("test_user", 999)
+
         self.handler_chain: List[HandlerProtocol] = [
-            ThrottleHandler(),
-            LlmHandler(llm=self.llm, chat_prompt=chat_prompt, tools=tools, terminal_tools=terminal_tools),
+            ThrottleHandler(throttle_dao),
+            LlmHandler(
+                llm=self.llm,
+                chat_prompt=chat_prompt,
+                tools=tools,
+                terminal_tools=terminal_tools,
+            ),
         ]
 
     async def invoke(self, context):
