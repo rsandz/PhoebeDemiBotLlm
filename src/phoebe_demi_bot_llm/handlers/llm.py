@@ -16,17 +16,23 @@ logger = logging.getLogger(__name__)
 
 class LlmHandler:
 
-    def __init__(self, llm, chat_prompt, tools: List[Callable] = [], terminal_tools: List[Callable] = []):
+    def __init__(
+        self,
+        llm,
+        chat_prompt,
+        tools: List[Callable] = [],
+        terminal_tools: List[Callable] = [],
+    ):
         self.chat_prompt = chat_prompt
         self.tools = tools
         self.terminal_tools = terminal_tools
 
         converted_tools = [convert_to_openai_function(t) for t in self.tools]
-        converted_terminal_tools = [convert_to_openai_function(t) for t in self.terminal_tools]
+        converted_terminal_tools = [
+            convert_to_openai_function(t) for t in self.terminal_tools
+        ]
 
-        llm_with_tools = llm.bind(
-            functions = converted_tools + converted_terminal_tools
-        )
+        llm_with_tools = llm.bind(functions=converted_tools + converted_terminal_tools)
 
         self.agent = (
             {
@@ -45,8 +51,10 @@ class LlmHandler:
 
         def bind_context_to_tool(tool, context):
             """Needed so that we don't close on loop variable"""
+
             def wrapped_tool():
                 return tool(context)
+
             return wrapped_tool
 
         for t in self.tools:

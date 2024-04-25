@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 if __name__ == "__main__":
     set_debug(False)
     set_verbose(False)
-    if (not load_dotenv()):
+    if not load_dotenv():
         logger.error("Error loading .env file")
         exit(1)
 
@@ -29,7 +29,11 @@ if __name__ == "__main__":
         discord_context=None,
     )
 
-    dispatcher = LlmDispatcher()
+    async def my_points(ctx):
+        "Returns my points"
+        return 100
+
+    dispatcher = LlmDispatcher(tools=[my_points])
 
     output = asyncio.run(dispatcher.invoke(context))
     logger.info("Response: %s", output)

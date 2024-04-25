@@ -4,6 +4,7 @@ from attr import dataclass
 
 from phoebe_demi_bot_llm.models.context import Context
 
+
 @dataclass
 class HandlerResponse:
     """Response from a handler.
