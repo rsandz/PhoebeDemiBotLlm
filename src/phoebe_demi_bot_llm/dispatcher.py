@@ -6,6 +6,7 @@ from langchain.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain.globals import set_debug, set_verbose
 
 from phoebe_demi_bot_llm.dao.throttle_dao import ThrottleDAO
+from phoebe_demi_bot_llm.handlers.allowlist_handler import AllowlistHandler
 from phoebe_demi_bot_llm.handlers.handler_protocol import (
     HandlerContinue,
     HandlerProtocol,
@@ -47,9 +48,9 @@ class LlmDispatcher:
 
         db = sqlite3.connect("bot_llm.db")
         throttle_dao = ThrottleDAO(db)
-        throttle_dao.insert_override_count_limit("test_user", 999)
 
         self.handler_chain: List[HandlerProtocol] = [
+            AllowlistHandler(throttle_dao),
             ThrottleHandler(throttle_dao),
             LlmHandler(
                 llm=self.llm,
