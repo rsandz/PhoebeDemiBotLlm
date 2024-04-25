@@ -27,9 +27,10 @@ class LlmDispatcher:
     def __init__(
         self,
         llm=None,
-        bot_prompt="",
+        bot_prompt=DEFAULT_PROMPT,
         tools: List[Callable] = [],
         terminal_tools: List[Callable] = [],
+        db_name = "bot_llm.db"
     ):
         if not llm:
             self.llm = ChatOpenAI(model="gpt-3.5-turbo", temperature=0)
@@ -46,7 +47,7 @@ class LlmDispatcher:
             ]
         )
 
-        db = sqlite3.connect("bot_llm.db")
+        db = sqlite3.connect(db_name)
         throttle_dao = ThrottleDAO(db)
 
         self.handler_chain: List[HandlerProtocol] = [

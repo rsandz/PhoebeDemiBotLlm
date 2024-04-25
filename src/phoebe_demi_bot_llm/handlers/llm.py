@@ -27,6 +27,9 @@ class LlmHandler:
         self.tools = tools
         self.terminal_tools = terminal_tools
 
+        logger.info(f"Terminal tools: {self.terminal_tools}")
+        logger.info(f"Tools: {self.tools}")
+
         converted_tools = [convert_to_openai_function(t) for t in self.tools]
         converted_terminal_tools = [
             convert_to_openai_function(t) for t in self.terminal_tools
@@ -76,7 +79,6 @@ class LlmHandler:
                 )
             )
 
-        logger.info("Context binded tools: %s", context_binded_tools)
         return context_binded_tools
 
     async def handle(self, context: Context):
