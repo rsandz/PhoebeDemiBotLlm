@@ -12,6 +12,7 @@ from phoebe_demi_bot_llm.handlers.handler_protocol import (
     HandlerProtocol,
     HandlerResponse,
 )
+from phoebe_demi_bot_llm.handlers.validation_handler import ValidationHandler
 from .handlers.llm import LlmHandler
 from .handlers.throttle_handler import ThrottleHandler
 from phoebe_demi_bot_llm.models.context import Context
@@ -63,6 +64,7 @@ class LlmDispatcher:
         throttle_dao = ThrottleDAO(db)
 
         self.handler_chain: List[HandlerProtocol] = [
+            ValidationHandler(),
             AllowlistHandler(throttle_dao),
             ThrottleHandler(throttle_dao),
             LlmHandler(
