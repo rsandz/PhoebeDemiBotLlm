@@ -1,5 +1,5 @@
 import logging
-from typing import Callable, List
+from typing import Awaitable, Callable, List, Sequence
 
 from langchain.agents import AgentExecutor
 from langchain.tools import StructuredTool
@@ -15,14 +15,24 @@ logger = logging.getLogger(__name__)
 
 
 class LlmHandler:
+    """Handler that uses Language Model to generate a response."""
 
     def __init__(
         self,
         llm,
         chat_prompt,
-        tools: List[Callable] = [],
-        terminal_tools: List[Callable] = [],
+        tools: Sequence[Callable[[Context], Awaitable]] = [],
+        terminal_tools: Sequence[Callable[[Context], Awaitable]] = [],
     ):
+        """
+        Initialize LlmHandler.
+
+        Args:
+            llm: Language Model to use
+            chat_prompt: Chat prompt to use
+            tools: List of tools to use. Must be async and have 1 arg that is context.
+            terminal_tools: List of terminal tools to use
+        """
         self.chat_prompt = chat_prompt
         self.tools = tools
         self.terminal_tools = terminal_tools
@@ -49,11 +59,22 @@ class LlmHandler:
             | OpenAIFunctionsAgentOutputParser()
         )
 
-    def get_context_binded_tools(self, context: Context):
+    def get_context_binded_tools(self, context: Context) -> List[StructuredTool]:
+        """
+        Get context binded tools
+
+        Args:
+            context: Context to bind tools to
+
+        Returns:
+            List of StructuredTool
+        """
         context_binded_tools = []
 
         def bind_context_to_tool(tool, context):
-            """Needed so that we don't close on loop variable"""
+            """
+            Needed so that we don't close on loop variable
+            """
 
             def wrapped_tool():
                 return tool(context)
@@ -81,12 +102,22 @@ class LlmHandler:
 
         return context_binded_tools
 
-    async def handle(self, context: Context):
+    async def handle(self, context: Context) -> HandlerResponse:
+        """
+        Handle the context and return a HandlerResponse
 
+        Args:
+            context: Context to handle
+
+        Returns:
+            HandlerResponse object
+        """
         context_binded_tools = self.get_context_binded_tools(context)
 
         agent_executor = AgentExecutor(
-            agent=self.agent, tools=context_binded_tools, max_iterations=2, verbose=True  # type: ignore
+            agent=self.agent,
+            tools=context_binded_tools,
+            max_iterations=2,  # type: ignore
         )
 
         output = (await agent_executor.ainvoke({"text": " ".join(context.msg)})).get(

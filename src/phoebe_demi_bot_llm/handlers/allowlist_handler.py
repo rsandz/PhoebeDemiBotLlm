@@ -1,9 +1,13 @@
 import logging
 from phoebe_demi_bot_llm.dao.throttle_dao import ThrottleDAO
-from phoebe_demi_bot_llm.handlers.handler_protocol import HandlerContinue, HandlerResponse
+from phoebe_demi_bot_llm.handlers.handler_protocol import (
+    HandlerContinue,
+    HandlerResponse,
+)
 from phoebe_demi_bot_llm.models.context import Context
 
 logger = logging.getLogger(__name__)
+
 
 class AllowlistHandler(object):
     def __init__(self, throttle_dao: ThrottleDAO):
@@ -16,4 +20,3 @@ class AllowlistHandler(object):
             return HandlerResponse("Sorry! You are not allowed to use this.")
         else:
             return HandlerContinue()
-

@@ -1,12 +1,16 @@
+"""Script used to test the package locally.
+
+Run via `python3 -m phoebe_demi_bot_llm.bot_llm`
+"""
+
 import asyncio
 import logging
 from langchain.globals import set_debug, set_verbose
 
-from models.context import Context
+from phoebe_demi_bot_llm.models.context import Context
+from phoebe_demi_bot_llm.dispatcher import LlmDispatcher
 
 from dotenv import load_dotenv
-
-from dispatcher import LlmDispatcher
 
 logger = logging.getLogger(__name__)
 

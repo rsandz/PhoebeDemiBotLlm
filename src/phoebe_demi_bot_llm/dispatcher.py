@@ -1,5 +1,5 @@
 import sqlite3
-from typing import Callable, List
+from typing import Awaitable, Callable, List, Sequence
 
 from langchain_openai import ChatOpenAI
 from langchain.prompts import ChatPromptTemplate, MessagesPlaceholder
@@ -12,11 +12,13 @@ from phoebe_demi_bot_llm.handlers.handler_protocol import (
     HandlerProtocol,
     HandlerResponse,
 )
-from phoebe_demi_bot_llm.handlers.llm import LlmHandler
-from phoebe_demi_bot_llm.handlers.throttle_handler import ThrottleHandler
+from .handlers.llm import LlmHandler
+from .handlers.throttle_handler import ThrottleHandler
+from phoebe_demi_bot_llm.models.context import Context
 
 
 class LlmDispatcher:
+    """Process user messages via LLM with guardrails."""
 
     DEFAULT_PROMPT = """
     You are a helpful discord bot. You play as 2 characters: Phoebe and Demi.
@@ -28,10 +30,20 @@ class LlmDispatcher:
         self,
         llm=None,
         bot_prompt=DEFAULT_PROMPT,
-        tools: List[Callable] = [],
-        terminal_tools: List[Callable] = [],
-        db_name = "bot_llm.db"
+        tools: Sequence[Callable[[Context], Awaitable]] = [],
+        terminal_tools: Sequence[Callable[[Context], Awaitable]] = [],
+        db_name="bot_llm.db",
     ):
+        """Initialize LlmDispatcher.
+
+        Args:
+            llm: Language Model to use.
+            bot_prompt: Prompt to that describes the bot and what it does.
+            tools: List of tools to use. Must be async and have 1 arg that is context.
+            terminal_tools: List of tools that will terminate LLM once ran.
+                Must be async and have 1 arg that is context.
+            db_name: Name of database to use.
+        """
         if not llm:
             self.llm = ChatOpenAI(model="gpt-3.5-turbo", temperature=0)
         else:
@@ -62,6 +74,14 @@ class LlmDispatcher:
         ]
 
     async def invoke(self, context):
+        """Invokes the dispatcher to process a message in context via LLM.
+
+        Args:
+            context: The context to be passed to each handler.
+
+        Returns:
+            None
+        """
         for handler in self.handler_chain:
             output = await handler.handle(context)
 
