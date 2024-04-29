@@ -1,6 +1,8 @@
 """Script used to test the package locally.
 
-Run via `python3 -m phoebe_demi_bot_llm.bot_llm`
+Run via 
+- `pip install -e .` # Install the package in editable mode.
+- `python3 -m phoebe_demi_bot_llm.bot_llm` # Run the package
 """
 
 import asyncio
