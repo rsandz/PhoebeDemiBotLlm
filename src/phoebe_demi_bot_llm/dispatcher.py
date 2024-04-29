@@ -55,6 +55,7 @@ class LlmDispatcher:
         chat_prompt = ChatPromptTemplate.from_messages(
             [
                 ("system", bot_prompt),
+                ("system", "The user's name is {user_name}"),
                 ("user", human_template),
                 MessagesPlaceholder(variable_name="agent_scratchpad"),
             ]

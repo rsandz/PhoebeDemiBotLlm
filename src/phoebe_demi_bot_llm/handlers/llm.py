@@ -50,6 +50,7 @@ class LlmHandler:
         self.agent = (
             {
                 "text": lambda x: x["text"],
+                "user_name": lambda x: x["user_name"],
                 "agent_scratchpad": lambda x: format_to_openai_function_messages(
                     x["intermediate_steps"]
                 ),
@@ -120,8 +121,10 @@ class LlmHandler:
             max_iterations=2,  # type: ignore
         )
 
-        output = (await agent_executor.ainvoke({"text": " ".join(context.msg)})).get(
-            "output"
-        )
+        output = (
+            await agent_executor.ainvoke(
+                {"text": " ".join(context.msg), "user_name": context.user_name}
+            )
+        ).get("output")
 
         return HandlerResponse(response=output)  # type: ignore
